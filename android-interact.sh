@@ -28,7 +28,11 @@ if [[ $1 == "uin" ]]; then
 	rm system_config_prefs.xml
 	echo "Got wechat uin: $uin"
 elif [[ $1 == "imei" ]]; then
-	imei=$(adb shell dumpsys iphonesubinfo | $GREP 'Device ID' | $GREP -o '[0-9]+')
+	adb shell "su -c 'cp $MM_DIR/MicroMsg/CompatibleInfo.cfg /data/local/tmp && chown shell.shell /data/local/tmp/CompatibleInfo.cfg'; cat /data/local/tmp/CompatibleInfo.cfg" > CompatibleInfo.cfg
+	imei=$(python2 dump-imei.py)
+	[[ -n $imei ]] || {
+		imei=$(adb shell dumpsys iphonesubinfo | $GREP 'Device ID' | $GREP -o '[0-9]+')
+	}
 	[[ -n $imei ]] || {
 		imei=$(adb shell service call iphonesubinfo 1 | awk -F "'" '{print $2}' | sed 's/[^0-9A-F]*//g' | tr -d '\n')
 	}
