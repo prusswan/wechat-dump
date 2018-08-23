@@ -22,6 +22,7 @@ def get_args():
     return args
 
 def get_key(imei, uin):
+    print (imei + uin)
     a = md5(imei + uin)
     return a.hexdigest()[:7]
 
@@ -44,6 +45,7 @@ if __name__ == '__main__':
     print "KEY: {}".format(key)
 
     print "Decrypt and dump database to {} ... ".format(output)
+    print args.db
     conn = sqlite.connect(args.db)
     c = conn.cursor()
     c.execute("PRAGMA key = '" + key + "';")

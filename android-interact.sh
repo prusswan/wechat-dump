@@ -14,10 +14,12 @@ RES_DIR="/mnt/sdcard/tencent/MicroMsg"
 MM_DIR="/data/data/com.tencent.mm"
 
 echo "Starting rooted adb server..."
-adb root
+#adb root
 
 if [[ $1 == "uin" ]]; then
-	adb pull $MM_DIR/shared_prefs/system_config_prefs.xml 2>/dev/null
+	#adb pull $MM_DIR/shared_prefs/system_config_prefs.xml 2>/dev/null
+	adb shell "su -c cat $MM_DIR/shared_prefs/system_config_prefs.xml" > system_config_prefs.xml
+	adb shell "su -c cat $MM_DIR/shared_prefs/auth_info_key_prefs.xml" > auth_info_key_prefs.xml
 	uin=$($GREP 'default_uin' system_config_prefs.xml | $GREP -o 'value=\"\-?[0-9]*' | cut -c 8-)
 	[[ -n $uin ]] || {
 		>&2 echo "Failed to get wechat uin. You can try other methods, or report a bug."
@@ -72,13 +74,15 @@ elif [[ $1 == "db" || $1 == "res" ]]; then
 		echo "Total size: $(du -sh resource | cut -f1)"
 	else
 		echo "Pulling database and avatar index file..."
-		adb pull $MM_DIR/MicroMsg/$chooseUser/EnMicroMsg.db
+		#adb pull $MM_DIR/MicroMsg/$chooseUser/EnMicroMsg.db
+		adb shell "su -c 'cp $MM_DIR/MicroMsg/$chooseUser/EnMicroMsg.db /data/local/tmp && chown shell.shell /data/local/tmp/EnMicroMsg.db'; cat /data/local/tmp/EnMicroMsg.db" > EnMicroMsg.db
 		[[ -f EnMicroMsg.db ]] && \
 			echo "Database successfully downloaded to EnMicroMsg.db" || {
 			>&2 echo "Failed to pull database by adb"
 			exit 1
 		}
-		adb pull $MM_DIR/MicroMsg/$chooseUser/sfs/avatar.index
+		#adb pull $MM_DIR/MicroMsg/$chooseUser/sfs/avatar.index
+		adb shell "su -c cat $MM_DIR/MicroMsg/$chooseUser/sfs/avatar.index" > avatar.index
 		[[ -f avatar.index ]] && \
 			echo "Avatar index successfully downloaded to avatar.index" || {
 				>&2 echo "Failed to pull avatar index by adb, are you using latest version of wechat?"
